@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">居護所個案管理</string>
+    <string name="title_activity_main">居護所個案管理</string>
+    <string name="package_name">com.minsheng.nursing</string>
+    <string name="custom_url_scheme">com.minsheng.nursing</string>
+</resources>

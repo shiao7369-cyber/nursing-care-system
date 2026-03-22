@@ -7,3 +7,14 @@ dist/
 .DS_Store
 Thumbs.db
 .vite/
+
+.vercel
+
+# Capacitor - Android/iOS build artifacts
+android/.gradle/
+android/build/
+android/app/build/
+ios/App/Pods/
+ios/App/App.xcworkspace/xcuserdata/
+*.keystore
+*.jks

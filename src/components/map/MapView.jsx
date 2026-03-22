@@ -8,7 +8,7 @@ import {
   Route, Layers, X, ChevronUp, ChevronDown, Wand2, Calendar, Sun, Moon
 } from 'lucide-react'
 
-import { MapContainer, TileLayer, Marker, Popup, useMap, Circle, Polyline } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap, Circle, Polyline } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
@@ -575,6 +575,9 @@ export default function MapView() {
             html: `<div style="background:#0369a1;width:36px;height:36px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;">🏥</div>`,
             className: '', iconSize: [36, 36], iconAnchor: [18, 18], popupAnchor: [0, -20],
           })}>
+            <Tooltip direction="top" offset={[0, -20]} opacity={0.95} permanent={false}>
+              <span style={{ fontSize: '13px', fontWeight: 600, color: '#0369a1' }}>🏥 {HOSPITAL_NAME}</span>
+            </Tooltip>
             <Popup><div className="text-sm font-bold text-primary-700">{HOSPITAL_NAME}</div><div className="text-xs text-gray-500">路徑起點</div></Popup>
           </Marker>
 
@@ -615,6 +618,17 @@ export default function MapView() {
                   }
                 }}
               >
+                <Tooltip direction="top" offset={[0, -30]} opacity={0.95}>
+                  <div style={{ whiteSpace: 'nowrap', fontSize: '13px', fontWeight: 600, color: '#111' }}>
+                    {orderNum > 0 && <span style={{ color: '#b91c1c', marginRight: 4 }}>#{orderNum}</span>}
+                    {p.name}
+                    {sched?.scheduled_time && (
+                      <span style={{ color: h !== null && h < 12 ? '#f97316' : '#6366f1', marginLeft: 6, fontWeight: 400, fontSize: '12px' }}>
+                        {sched.scheduled_time.slice(0, 5)}
+                      </span>
+                    )}
+                  </div>
+                </Tooltip>
                 <Popup minWidth={200}>
                   <div className="space-y-2 py-1">
                     <div>

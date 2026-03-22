@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Vite Dev Server",
+      "runtimeExecutable": "cmd.exe",
+      "runtimeArgs": ["/c", "npm run dev"],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "Vite Preview",
+      "runtimeExecutable": "cmd.exe",
+      "runtimeArgs": ["/c", "npm run preview"],
+      "port": 4173
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(echo \"exit: $?\")",
+      "Bash(npm create:*)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(grep -r \"from ''../../hooks/useAuth.js''\" \"/c/Users/shiao/Desktop/居護所系統/src/\")",
+      "Bash(grep -r \"from ''../../hooks/usePatients.js''\" \"/c/Users/shiao/Desktop/居護所系統/src/\")",
+      "Bash(grep -r \"from ''../hooks/useAuth.js''\" \"/c/Users/shiao/Desktop/居護所系統/src/\")",
+      "Bash(pkill -f \"vite\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(where npm:*)",
+      "Bash(npm run:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/)",
+      "Bash(supabase --version)",
+      "Bash(docker --version)",
+      "Bash(npx supabase:*)",
+      "WebSearch",
+      "WebFetch(domain:api.tgos.tw)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:terrence0303-64740.medium.com)",
+      "WebFetch(domain:addr.tgos.tw)",
+      "WebFetch(domain:geocoder.readthedocs.io)",
+      "WebFetch(domain:nominatim.org)",
+      "WebFetch(domain:brianwu.gitbook.io)",
+      "WebFetch(domain:ithelp.ithome.com.tw)",
+      "WebFetch(domain:gis.rchss.sinica.edu.tw)",
+      "Bash(claude --dangerously-skip-permissions)"
+    ]
+  }
+}

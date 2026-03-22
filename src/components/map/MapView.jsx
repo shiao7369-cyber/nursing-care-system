@@ -103,17 +103,9 @@ function FlyTo({ flyTo, zoom }) {
 
 const toDateStr = (d) => d.toISOString().slice(0, 10)
 
-// 敏盛綜合醫院預設座標（可由使用者拖動調整後存入 localStorage）
-const DEFAULT_HOSPITAL_LATLNG = [24.9939, 121.3113]
+// 敏盛綜合醫院固定座標（不可移動）
+const HOSPITAL_LATLNG = [24.9939, 121.3113]
 const HOSPITAL_NAME = '敏盛綜合醫院'
-
-function loadHospitalLatlng() {
-  try {
-    const saved = localStorage.getItem('hospital_latlng')
-    if (saved) return JSON.parse(saved)
-  } catch {}
-  return DEFAULT_HOSPITAL_LATLNG
-}
 
 export default function MapView() {
   const navigate = useNavigate()
@@ -136,7 +128,6 @@ export default function MapView() {
   const [geocodeProgress, setGeocodeProgress] = useState('')
   const [tab, setTab] = useState('all') // 'am' | 'pm' | 'all'
   const [selectedDate, setSelectedDate] = useState(toDateStr(new Date()))
-  const [hospitalLatlng, setHospitalLatlng] = useState(loadHospitalLatlng)
 
   useEffect(() => {
     fetchData()
@@ -228,7 +219,7 @@ export default function MapView() {
     setRouteOrder([])
     const targets = subset || scheduledMapped
     if (!targets.length) { toast.error('沒有已設定座標的訪視個案'); return }
-    const start = routeStart === 'hospital' ? hospitalLatlng : (gpsPosition?.latlng || hospitalLatlng)
+    const start = routeStart === 'hospital' ? HOSPITAL_LATLNG : (gpsPosition?.latlng || HOSPITAL_LATLNG)
     const withTime = targets.map(p => ({
       ...p,
       _visitTime: scheduleMap[p.id]?.scheduled_time || null
@@ -579,38 +570,20 @@ export default function MapView() {
           <TileLayer url={tileUrls[mapTile]} attribution='&copy; OpenStreetMap contributors' maxZoom={19} />
           {flyTo && <FlyTo flyTo={flyTo} zoom={15} />}
 
-          {/* 醫院起點標記 */}
+          {/* 醫院起點標記（固定，不可移動） */}
           <Marker
-            position={hospitalLatlng}
+            position={HOSPITAL_LATLNG}
             icon={L.divIcon({
               html: `<div style="background:#0369a1;width:36px;height:36px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;">🏥</div>`,
               className: '', iconSize: [36, 36], iconAnchor: [18, 18], popupAnchor: [0, -20],
             })}
-            draggable={true}
-            eventHandlers={{
-              dragend: (e) => {
-                const { lat, lng } = e.target.getLatLng()
-                const latlng = [lat, lng]
-                setHospitalLatlng(latlng)
-                localStorage.setItem('hospital_latlng', JSON.stringify(latlng))
-                toast.success('醫院位置已更新')
-              }
-            }}
           >
             <Tooltip direction="top" offset={[0, -20]} opacity={0.95} permanent={false}>
-              <span style={{ fontSize: '13px', fontWeight: 600, color: '#0369a1' }}>🏥 {HOSPITAL_NAME}（可拖動）</span>
+              <span style={{ fontSize: '13px', fontWeight: 600, color: '#0369a1' }}>🏥 {HOSPITAL_NAME}</span>
             </Tooltip>
             <Popup>
               <div className="text-sm font-bold text-primary-700">{HOSPITAL_NAME}</div>
-              <div className="text-xs text-gray-500 mt-1">路徑起點・可拖動調整位置</div>
-              <button
-                onClick={() => {
-                  setHospitalLatlng(DEFAULT_HOSPITAL_LATLNG)
-                  localStorage.removeItem('hospital_latlng')
-                  toast.success('已重設為預設位置')
-                }}
-                className="mt-2 text-xs text-red-500 hover:underline"
-              >↩ 重設為預設位置</button>
+              <div className="text-xs text-gray-500 mt-1">路徑起點</div>
             </Popup>
           </Marker>
 

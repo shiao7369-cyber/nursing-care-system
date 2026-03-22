@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { usePatients } from '../../hooks/usePatients'
+import { useAuth } from '../../hooks/useAuth'
+import { supabase } from '../../lib/supabase'
 import { useToast } from '../ui/Toast'
 import PatientForm from './PatientForm'
 import Modal from '../ui/Modal'
@@ -29,9 +31,13 @@ export default function PatientList() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { patients, loading, fetchPatients, deletePatient, createPatient, geocodeAddress } = usePatients()
+  const { profile } = useAuth()
+  const isAdmin = profile?.role === 'admin'
   const toast = useToast()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || '')
+  const [nurseFilter, setNurseFilter] = useState(searchParams.get('nurse') || '')
+  const [nurses, setNurses] = useState([])
   const [showForm, setShowForm] = useState(searchParams.get('new') === '1')
   const [editPatient, setEditPatient] = useState(null)
   const [openMenu, setOpenMenu] = useState(null)
@@ -41,6 +47,14 @@ export default function PatientList() {
   const [importing, setImporting] = useState(false)
   const [importProgress, setImportProgress] = useState('')
   const fileInputRef = useRef(null)
+
+  // 管理員才抓護理師清單
+  useEffect(() => {
+    if (isAdmin) {
+      supabase.from('profiles').select('id, full_name').eq('role', 'nurse').order('full_name')
+        .then(({ data }) => setNurses(data || []))
+    }
+  }, [isAdmin])
 
   const FIELD_MAP = {
     '案號': 'case_number', '病歷號': 'case_number', '個案編號': 'case_number',
@@ -231,10 +245,10 @@ export default function PatientList() {
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      fetchPatients({ search, status: statusFilter })
+      fetchPatients({ search, status: statusFilter, nurseId: nurseFilter || undefined })
     }, 300)
     return () => clearTimeout(delayDebounce)
-  }, [search, statusFilter])
+  }, [search, statusFilter, nurseFilter])
 
   const statusBadge = (status) => {
     const map = {
@@ -258,15 +272,51 @@ export default function PatientList() {
   return (
     <div className="space-y-5 fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <Users size={24} className="text-primary-600" />
             個案管理
           </h1>
-          <p className="text-gray-500 text-sm mt-1">共 {patients.length} 位個案</p>
+          <p className="text-gray-500 text-sm mt-1">
+            共 {patients.length} 位個案
+            {nurseFilter && nurses.length > 0 && (
+              <span className="ml-1 text-primary-600 font-medium">
+                · {nurses.find(n => n.id === nurseFilter)?.full_name}
+              </span>
+            )}
+          </p>
         </div>
-        <div className="flex items-center gap-2">
+
+        {/* 護理師 Tabs（管理員）+ 操作按鈕 */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {isAdmin && nurses.length > 0 && (
+            <div className="flex items-center gap-1.5 bg-gray-100 rounded-xl p-1">
+              <button
+                onClick={() => setNurseFilter('')}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                  nurseFilter === ''
+                    ? 'bg-white text-primary-700 shadow-sm font-semibold'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                全部
+              </button>
+              {nurses.map(nurse => (
+                <button
+                  key={nurse.id}
+                  onClick={() => setNurseFilter(nurseFilter === nurse.id ? '' : nurse.id)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                    nurseFilter === nurse.id
+                      ? 'bg-primary-600 text-white shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  {nurse.full_name}
+                </button>
+              ))}
+            </div>
+          )}
           <input ref={fileInputRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={handleFileChange} />
           <button onClick={() => fileInputRef.current?.click()} className="btn-secondary flex items-center gap-1.5">
             <Upload size={16} />

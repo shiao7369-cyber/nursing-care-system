@@ -14,6 +14,7 @@ export function usePatients() {
       .order('created_at', { ascending: false })
 
     if (filters.status) query = query.eq('status', filters.status)
+    if (filters.nurseId) query = query.eq('created_by', filters.nurseId)
     if (filters.search) {
       query = query.or(`name.ilike.%${filters.search}%,case_number.ilike.%${filters.search}%,phone.ilike.%${filters.search}%`)
     }

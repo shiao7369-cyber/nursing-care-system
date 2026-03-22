@@ -108,14 +108,18 @@ export default function PatientList() {
       const allRows = []
       const errors = []
 
-      // 從工作表名稱判斷管路狀態：含 (A) = 有管路，含 (E) = 無管路
+      // 從工作表名稱判斷管路狀態
+      // 支援格式：(A)/(E) 帶括號，或 A1/A5/E1/E5 不帶括號
       const getCatheter = (name) => {
         const u = name.toUpperCase()
         if (u.includes('(A)')) return '有管路'
         if (u.includes('(E)')) return '無管路'
+        // 匹配 A 或 E 後面接數字，例如 巾芥A1、林E1、嘉A5
+        if (/A\d/.test(u)) return '有管路'
+        if (/E\d/.test(u)) return '無管路'
         return null
       }
-      // 只處理含 (A) 或 (E) 的工作表，其餘略過
+      // 只處理個案工作表（含 A/E 標記），班表/收費等略過
       const targetSheets = wb.SheetNames.filter(n => getCatheter(n) !== null)
       const sheetsToProcess = targetSheets.length > 0 ? targetSheets : [wb.SheetNames[0]]
 

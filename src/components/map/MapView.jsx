@@ -8,7 +8,7 @@ import {
   Route, Layers, X, ChevronUp, ChevronDown, Wand2, Calendar, Sun, Moon
 } from 'lucide-react'
 
-import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap, Circle, Polyline } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap, useMapEvents, Circle, Polyline } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
@@ -101,6 +101,18 @@ function FlyTo({ flyTo, zoom }) {
   return null
 }
 
+// 點擊地圖顯示座標（供校正用）
+function MapClickCoords({ enabled, onCoords }) {
+  useMapEvents({
+    click(e) {
+      if (!enabled) return
+      const { lat, lng } = e.latlng
+      onCoords([parseFloat(lat.toFixed(7)), parseFloat(lng.toFixed(7))])
+    }
+  })
+  return null
+}
+
 const toDateStr = (d) => d.toISOString().slice(0, 10)
 
 // 敏盛綜合醫院固定座標（桃園市桃園區經國路168號）
@@ -123,6 +135,7 @@ export default function MapView() {
   const [etaLoading, setEtaLoading] = useState(false)
   const [showPanel, setShowPanel] = useState(true)
   const [mapTile, setMapTile] = useState('street')
+  const [coordPick, setCoordPick] = useState(null) // 點擊地圖取得座標
   const [routeStart, setRouteStart] = useState('hospital') // 'hospital' | 'gps'
   const [geocoding, setGeocoding] = useState(false)
   const [geocodeProgress, setGeocodeProgress] = useState('')
@@ -569,6 +582,7 @@ export default function MapView() {
         <MapContainer center={mapCenter} zoom={13} className="w-full h-full" zoomControl={true}>
           <TileLayer url={tileUrls[mapTile]} attribution='&copy; OpenStreetMap contributors' maxZoom={19} />
           {flyTo && <FlyTo flyTo={flyTo} zoom={15} />}
+          <MapClickCoords enabled={true} onCoords={setCoordPick} />
 
           {/* 醫院起點標記（固定，不可移動） */}
           <Marker
@@ -674,6 +688,17 @@ export default function MapView() {
 
           <GPSTracker position={gpsPosition} setPosition={setGpsPosition} />
         </MapContainer>
+
+        {/* 點擊座標顯示（校正用） */}
+        {coordPick && (
+          <div className="absolute top-4 right-4 z-[2000] bg-black/80 text-white text-xs rounded-xl px-4 py-3 shadow-xl font-mono flex flex-col gap-1">
+            <div className="text-yellow-300 font-bold mb-1">📍 點擊座標</div>
+            <div>lat: <span className="text-green-300">{coordPick[0]}</span></div>
+            <div>lng: <span className="text-green-300">{coordPick[1]}</span></div>
+            <button onClick={() => { navigator.clipboard?.writeText(`[${coordPick[0]}, ${coordPick[1]}]`); }} className="mt-1 text-blue-300 hover:text-blue-100 underline text-left">複製</button>
+            <button onClick={() => setCoordPick(null)} className="text-gray-400 hover:text-white text-left">關閉</button>
+          </div>
+        )}
 
         {/* 底部統計 */}
         <div className="absolute bottom-4 left-4 z-[1000] bg-white/95 backdrop-blur-sm shadow-lg rounded-xl px-4 py-2 border border-gray-200">

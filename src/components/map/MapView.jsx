@@ -103,8 +103,8 @@ function FlyTo({ flyTo, zoom }) {
 
 const toDateStr = (d) => d.toISOString().slice(0, 10)
 
-// 敏盛綜合醫院固定座標（桃園市桃園區經國路168號，手動校正）
-const HOSPITAL_LATLNG = [25.0162768, 121.3063819]
+// 敏盛綜合醫院固定座標（OSM way center，桃園市桃園區經國路168號）
+const HOSPITAL_LATLNG = [25.0164514, 121.3063131]
 const HOSPITAL_NAME = '敏盛綜合醫院'
 
 export default function MapView() {
